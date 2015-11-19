@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'date'
+
 diff_dir = File.dirname(File.expand_path(__FILE__))
 
 f = {
@@ -11,11 +13,11 @@ f = {
 f.each_pair do |k,v|
 	puts v.inspect
 end
-tags = %x{git tag | grep 2014 }.split(/\n/)
+tags = %x{git tag | egrep '4\.[0-9]\+\.[0-9]\+-#{Date.today.year}' }.split(/\n/)
 last_tag    = ARGV[0] || tags.last
 next_branch = ARGV[1] || "release"
 
-puts "Comparing last tag: #{last_tag} with branch '#{next_branch}'" 
+puts "Comparing last tag: #{last_tag} with branch '#{next_branch}'"
 %x{git diff -b --name-only #{last_tag}..#{next_branch} > #{f[:names]}}
 %x{git diff -b --summary #{last_tag}..#{next_branch} > #{f[:summs]}}
 %x{git diff -b #{last_tag}..#{next_branch} > #{f[:diffs]}}
