@@ -44,7 +44,7 @@ end
 
 modules.each_with_index do |m,i|
   puts "%2d: %s" % [i,m] if debug
-  res = %x{#{options[:msf_path]}/tools/msftidy.rb #{m}}
+  res = %x{#{options[:msf_path]}/tools/dev/msftidy.rb #{m}}
   next unless res && res.size > 1
   puts res
 end
