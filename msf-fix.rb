@@ -79,6 +79,7 @@ end
 
 def sort_and_pluralize_author(author_list)
   return unless author_list.kind_of? Array
+
   author_list = author_list.sort
   ["todb", "hdm", "egyp7", "egypt", "juan vazquez", "juan", "sinn3r", "wvu", "joev"].each do |msf_author|
     if author_list.include? msf_author
@@ -94,17 +95,17 @@ def sort_and_pluralize_author(author_list)
       end
     end
   end
+
   case author_list.size
   when 0
     author_list = "NOBODY"
   when 1
     author_list = author_list.first
-  when 2
-    author_list = "%s and %s" % author_list
   else
-    last_author = author_list.pop
-    author_list = "%s, and %s" % [author_list.join(", "), last_author]
+    author_list[-1] = "and #{author_list[-1]}"
+    author_list = author_list.join(", ")
   end
+
   return author_list
 end
 
@@ -237,3 +238,4 @@ puts "\n\n\n"
     end
   end
 end
+puts "As always, you can update to the latest Metasploit Framework with a simple msfupdate and the full diff is available on GitHub: "

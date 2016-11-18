@@ -13,10 +13,6 @@ optparse = OptionParser.new do |opts|
     options[:msf_path] = msfpath
   end
 
-  opts.on('-d', '--debug', 'Debug output') do |debug|
-    options[:debug] = debug
-  end
-
   opts.on('-u', '--url', 'Show just URLs, no summary') do |url|
     options[:url] = url
   end
@@ -57,18 +53,18 @@ summs = %x{git diff -b --summary #{prev_tag}..#{release_tag} | tee #{files[:summ
 modules = []
 optparse.parse!
 
-debug = options[:debug]
-
 summs.each_line do |line|
   next unless line =~ /^\s+create mode .* (modules.*)\r?\n$/
   modpath = $1
   next if modpath =~ /modules\/payload/ # Skip payload checks for now
   next if modpath =~ /modules\/encoders/ # Skip encoder checks for now
   modules << modpath
+  puts modpath
 end
 
+puts
+
 modules.each_with_index do |m,i|
-  puts "%2d: %s" % [i,m] if debug
   res = %x{#{options[:msf_path]}/tools/dev/msftidy.rb #{m}}
   next unless res && res.size > 1
   puts res
@@ -92,6 +88,10 @@ def msf_modname(modname)
     type = "auxiliary"
   when /post/
     type = "post"
+  when /encoder/
+    type = "encoder"
+  when /nops/
+    type = "nop"
   end
   type + modname.gsub(/^modules.(exploits|auxiliary|post)/,"").gsub(/\.rb$/,"")
 end
@@ -230,6 +230,8 @@ console_output.each_line do |line|
   else
     if line =~ /BEGIN: (.*)/
       @module_url = $1
+      @module_authors = nil
+      @module_references = nil
     end
   end
 end
@@ -237,40 +239,38 @@ end
 {"Exploit modules" => @exploits, "Auxiliary and post modules" => @modules}.each do |type, module_list|
 
   unless module_list.empty?
-    puts "<p><em>#{type} (#{module_list.length} new)</em></p>"
-    puts "<ul>"
+    puts "# New Modules"
+    puts "*#{type}* *(#{module_list.length} new)*"
     module_list.each_pair do |db_url,v|
       case v[:ref].to_s
       when "", "XXX-NOREF"
-        msg = %Q|<li><a href="#{db_url}">#{v[:name]}</a> by #{v[:authors]}</li>|
+        msg = %Q|  * [#{v[:name]}](#{db_url}) by #{v[:authors]}|
       else
-        msg = %Q|<li><a href="#{db_url}">#{v[:name]}</a> by #{v[:authors]} exploits #{v[:ref]}</li>|
+        msg = %Q|  * [#{v[:name]}](#{db_url}) by #{v[:authors]} exploits #{v[:ref]}|
       end
       puts msg
     end
-    puts "</ul>"
-    puts "<p></p>\n"
   end
 
 end
 
 puts <<-EOM
-<h2>Get it</h2>
-<p>
+
+# Get it
+
 As always, you can update to the latest Metasploit Framework with a simple
-msfupdate and the full diff is available on GitHub: <a href="https://github.com/rapid7/metasploit-framework/compare/#{prev_tag}...#{release_tag}">#{prev_tag}...#{release_tag}</a>
-<p>
+`msfupdate` and the full diff since the last blog post is available on GitHub:
+[#{prev_tag}...#{release_tag}][diff]
+
+To install fresh, check out the open-source-only [Nightly
+Installers][nightly], or the [binary installers][binary] which also include
+the commercial editions.
+
+[binary]: https://www.rapid7.com/products/metasploit/download.jsp
+[diff]: https://github.com/rapid7/metasploit-framework/compare/#{prev_tag}...#{release_tag}
+[nightly]: https://github.com/rapid7/metasploit-framework/wiki/Nightly-Installers
+
 EOM
 
-
-puts "\n\n\n"
-{"exploit" => @exploits, "other module" => @modules}.each do |type, module_list|
-  unless module_list.empty?
-    puts "* #{module_list.count} new #{type}#{module_list.count == 1 ? '' : 's'}"
-    module_list.each_pair do |k,v|
-      puts "  * [#{v[:name]}](#{k})"
-    end
-  end
-end
-
+puts "\n\n"
 

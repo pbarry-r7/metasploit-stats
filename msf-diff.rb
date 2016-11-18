@@ -1,32 +1,39 @@
 #!/usr/bin/env ruby
 
-require 'date'
-
 diff_dir = File.dirname(File.expand_path(__FILE__))
 
 f = {
-	:diffs => File.join(diff_dir,"details.diff"),
-	:summs => File.join(diff_dir,"summary.txt"),
-	:names => File.join(diff_dir,"names.txt")
+  diffs: File.join(diff_dir,"details.diff"),
+  names: File.join(diff_dir,"names.txt"),
+  summs: File.join(diff_dir,"summary.txt"),
 }
 
 f.each_pair do |k,v|
-	puts v.inspect
+  puts v.inspect
 end
-tags = %x{git tag | egrep '4\.[0-9]\+\.[0-9]\+-#{Date.today.year}' }.split(/\n/)
-last_tag    = ARGV[0] || tags.last
-next_branch = ARGV[1] || "release"
+prev_tag = ARGV.shift
+release_tag = ARGV.shift
 
-puts "Comparing last tag: #{last_tag} with branch '#{next_branch}'"
-%x{git diff -b --name-only #{last_tag}..#{next_branch} > #{f[:names]}}
-%x{git diff -b --summary #{last_tag}..#{next_branch} > #{f[:summs]}}
-%x{git diff -b #{last_tag}..#{next_branch} > #{f[:diffs]}}
+tags = %x{git for-each-ref --sort=taggerdate --format '%(refname) %(taggerdate)' refs/tags|cut -f 1 -d ' '|cut -d '/' -f 3|tail -n2}.split
+
+release_tag ||= tags.last
+
+if ARGV.include?("--head")
+  prev_tag = release_tag
+  release_tag = 'HEAD'
+end
+
+puts "Comparing: #{prev_tag} with #{release_tag}"
+%x{git diff -b --name-only #{prev_tag}..#{release_tag} > #{f[:names]}}
+%x{git diff -b --summary #{prev_tag}..#{release_tag} > #{f[:summs]}}
+%x{git diff -b #{prev_tag}..#{release_tag} > #{f[:diffs]}}
+
 puts "Done, to edit modules:"
 puts ""
-fh = File.open(f[:summs]) {|f| f.read f.stat.size}
+fh = File.open(f[:summs]) {|fd| fd.read fd.stat.size}
 mods = []
 fh.each_line do |line|
-	next unless line =~ /create mode.*modules/
-	mods << line.split.last.strip
+  next unless line =~ /create mode.*modules/
+  mods << line.split.last.strip
 end
-puts "gvim #{mods.join " "}"
+puts "vim #{mods.join " "}"
