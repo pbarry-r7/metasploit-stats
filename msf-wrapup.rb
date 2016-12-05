@@ -45,6 +45,9 @@ else
   prev_tag ||= tags.first
 end
 
+prev_date = %x{git log -1 --reverse --format='%aI' #{prev_tag}}.chomp
+release_date = %x{git log -1 --reverse --format='%aI' #{release_tag}}.chomp
+
 puts "Comparing: #{prev_tag} with #{release_tag}"
 %x{git diff -b --name-only #{prev_tag}..#{release_tag} > #{files[:names]}}
 summs = %x{git diff -b --summary #{prev_tag}..#{release_tag} | tee #{files[:summs]}}
@@ -258,9 +261,12 @@ puts <<-EOM
 
 # Get it
 
-As always, you can update to the latest Metasploit Framework with a simple
-`msfupdate` and the full diff since the last blog post is available on GitHub:
-[#{prev_tag}...#{release_tag}][diff]
+As always, you can update to the latest Metasploit Framework with `msfupdate`
+and you can get more details on the changes since the last blog post from
+GitHub:
+
+  * [Pull Requsts #{prev_tag}...#{release_tag}][prs-landed]
+  * [Full diff #{prev_tag}...#{release_tag}][diff]
 
 To install fresh, check out the open-source-only [Nightly
 Installers][nightly], or the [binary installers][binary] which also include
@@ -268,6 +274,7 @@ the commercial editions.
 
 [binary]: https://www.rapid7.com/products/metasploit/download.jsp
 [diff]: https://github.com/rapid7/metasploit-framework/compare/#{prev_tag}...#{release_tag}
+[prs-landed]: https://github.com/rapid7/metasploit-framework/pulls?q=is:pr+merged:"#{prev_date}+..+#{release_date}"
 [nightly]: https://github.com/rapid7/metasploit-framework/wiki/Nightly-Installers
 
 EOM
