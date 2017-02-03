@@ -59,21 +59,23 @@ class ReleaseNotes
   attr_accessor :git
   attr_accessor :git_client
 
+  # You can generate your own oauth token by doing this:
+  # 1. Go to your Github account
+  # 2. Click on Settings -> Personal access tokens -> Generate new token.
+  # 3. Save the new token as an environment variable.
+  #    In Linux or OS X, you can make this permanent by adding a line like
+  #    this to your ~/.bash_profile:
+  #    `export GITHUB_OAUTH_TOKEN="Your token here"`
+  #
+  # @param token [String] a GitHub OAuth token
   def initialize(token=nil)
     unless REPO
       fail "You need to set a 'MSFDIR' environment variable before using this script. " +
-           "And this path should point to your local Metasploit Framework repository."
+           "This path should point to your local Metasploit Framework repository."
     end
 
-    # You can choose to use your own oauth token by doing this:
-    # 1. Go to your Github account
-    # 2. Click on Settings -> Personal access tokens -> Generate new token.
-    # 3. Save the new token as an environment variable.
-    #    For example, for OS X, open ~/.bash_profile, and then add this line:
-    #    export GITHUB_OAUTH_TOKEN="Your token here"
-    #
-    # Or, if you are feeling lazy, you can't skip doing all that, just use the hardcoded one (mine)
-    token = token.nil? && ENV.has_key?('GITHUB_OAUTH_TOKEN') ? ENV['GITHUB_OAUTH_TOKEN'] : '88a9266779a6ec6c26d6dde3b7da883a0c2e7f44'
+    token ||= ENV['GITHUB_OAUTH_TOKEN']
+    fail "Missing OAuth token" unless token
 
     @git = Git.open(REPO)
     @git_client = Octokit::Client.new(access_token: token)
