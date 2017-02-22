@@ -130,7 +130,11 @@ def sort_and_pluralize_author(author_list)
     author_list = author_list.first
   else
     author_list[-1] = "and #{author_list[-1]}"
-    author_list = author_list.join(", ")
+    if author_list.length == 2
+      author_list = author_list.join(" ")
+    else
+      author_list = author_list.join(", ")
+    end
   end
 
   return author_list
