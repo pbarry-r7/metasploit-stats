@@ -155,7 +155,9 @@ def select_best_reference(ref_list)
     when /cve.mitre.*name=(.*)/, /cvedetails\x2ecom[\x5c\x2f]cve[\x5c\x2f]([^\x5c\x2f]*)/
       val = $1
       next if ret.to_s =~ /^(MS|ZDI)/
-      ret = "CVE-#{val}"
+      ret = ""
+      ret << "CVE-" unless val =~ /^CVE-/
+      ret << "#{val}"
     when /osvdb.org[\x5c\x2f](\d+)/
       val = $1
       next if ret.to_s =~ /^(MS|ZDI|CVE)/
