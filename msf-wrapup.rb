@@ -246,10 +246,9 @@ console_output.each_line do |line|
 end
 
 puts "# New Modules"
-puts
 {"Exploit modules" => @exploits, "Auxiliary and post modules" => @modules}.each do |type, module_list|
-
   unless module_list.empty?
+    puts
     puts "*#{type}* *(#{module_list.length} new)*"
     module_list.each_pair do |db_url,v|
       case v[:ref].to_s
