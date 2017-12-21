@@ -255,7 +255,7 @@ puts "# New Modules"
       when "", "XXX-NOREF"
         msg = %Q|  * [#{v[:name]}](#{db_url}) by #{v[:authors]}|
       else
-        msg = %Q|  * [#{v[:name]}](#{db_url}) by #{v[:authors]} exploits #{v[:ref]}|
+        msg = %Q|  * [#{v[:name]}](#{db_url}) by #{v[:authors]}, which exploits #{v[:ref]}|
       end
       puts msg
     end
@@ -271,7 +271,7 @@ As always, you can update to the latest Metasploit Framework with `msfupdate`
 and you can get more details on the changes since the last blog post from
 GitHub:
 
-  * [Pull Requsts #{prev_tag}...#{release_tag}][prs-landed]
+  * [Pull Requests #{prev_tag}...#{release_tag}][prs-landed]
   * [Full diff #{prev_tag}...#{release_tag}][diff]
 
 To install fresh, check out the open-source-only [Nightly
